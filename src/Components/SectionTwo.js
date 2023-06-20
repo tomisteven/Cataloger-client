@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Dna } from "react-loader-spinner";
 import "./SectionTwo.css";
-import { Label, Menu, Button } from "semantic-ui-react";
+import "./responsiveSectionTwo.css";
+import { Label, Menu, Button, Dropdown } from "semantic-ui-react";
 import product1 from "../assets/product1.webp";
 import product2 from "../assets/product2.webp";
 import product3 from "../assets/producto3.webp";
@@ -13,6 +14,7 @@ export default function SectionTwo() {
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState("");
   const [productsSelected, setProductsSelected] = useState([]);
+  const [stateCart, setStateCart] = useState(false);
 
   const data = {
     categorias: [
@@ -97,6 +99,18 @@ export default function SectionTwo() {
         category: "Accesorios",
       },
       {
+        id: 4,
+        name: "Producto 4",
+        description:
+          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.",
+        price: 15000,
+        image: product4,
+        colors: ["grey", "black"],
+        stock: 10,
+        active: true,
+        category: "Hogar",
+      },
+      {
         id: 1,
         name: "Televisor LED 4k LG",
         description:
@@ -130,6 +144,18 @@ export default function SectionTwo() {
         stock: 10,
         active: true,
         category: "Deportes",
+      },
+      {
+        id: 3,
+        name: "Producto 3",
+        description:
+          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum.",
+        price: 8999,
+        image: product3,
+        colors: ["green", "teal", "blue"],
+        stock: 10,
+        active: true,
+        category: "Ropa",
       },
     ],
   };
@@ -184,9 +210,11 @@ export default function SectionTwo() {
     <>
       <section id="productos" className="section-two">
         <div class="section-filters">
+          <h5>Filtros {value ? "/" + value : ""}</h5>
           <div class="cont-filters">
-            <h5>Filtros {value ? "/" + value : ""}</h5>
             <Button
+              className="btn-ver-todos"
+              size="small"
               onClick={() => {
                 setProducts(data);
                 setValue("");
@@ -195,23 +223,49 @@ export default function SectionTwo() {
             >
               Ver todos
             </Button>
-            <Menu vertical>
-              {products.categorias.map((item, k) => (
-                <Menu.Item key={k} onClick={() => filterData(item)}>
-                  <Label>
-                    {
-                      data.productos.filter((prod) => prod.category === item)
-                        .length
-                    }
-                  </Label>
-                  {item}
-                </Menu.Item>
-              ))}
-            </Menu>
+
+            {window.innerWidth > 768 ? (
+              <Menu
+                className="menu-filters"
+                size="small"
+                pointing={window.innerWidth > 768 ? false : true}
+                vertical={window.innerWidth > 768 ? true : false}
+              >
+                {products.categorias.map((item, k) => (
+                  <Menu.Item key={k} onClick={() => filterData(item)}>
+                    <Label color="green">
+                      {
+                        data.productos.filter((prod) => prod.category === item)
+                          .length
+                      }
+                    </Label>
+                    {item}
+                  </Menu.Item>
+                ))}
+              </Menu>
+            ) : (
+              <Dropdown
+                value={value}
+                placeholder="Selecciona una categoria"
+                fluid
+                selection
+                options={products.categorias.map((item) => ({
+                  key: item,
+                  text: item,
+                  value: item,
+                }))}
+                onChange={(e, { value }) => filterData(value)}
+              />
+            )}
           </div>
         </div>
         <div class="section-products">
-          <h5 className="title-section-two">Productos</h5>
+          <h5 className="title-section-two">
+            {productsSelected.length > 0
+              ? productsSelected.length
+              : products.productos.length}{" "}
+            Productos
+          </h5>
           <div className="container-products">
             {products.productos.map((item, k) => (
               <div key={k} className="card-product">
@@ -230,7 +284,13 @@ export default function SectionTwo() {
                   <div class="cont-colors">
                     {item.colors ? (
                       item.colors.map((color, i) => (
-                        <Label circular color={color} key={color}>
+                        <Label
+                          size="tiny"
+                          className="colors-product"
+                          circular
+                          color={color}
+                          key={color}
+                        >
                           {i + 1}
                         </Label>
                       ))
@@ -242,10 +302,12 @@ export default function SectionTwo() {
                   </div>
                   <div class="cont-price">
                     <Button
-                      color="yellow"
-                      icon="dollar"
+                      className="btn-add-cart"
+                      color="teal"
+                      size="mini"
+                      icon="add"
                       label={
-                        <Label color="blue" size="large">
+                        <Label size="tiny" color="blue">
                           $
                           {new Intl.NumberFormat("de-DE", {
                             style: "currency",
@@ -347,6 +409,7 @@ export default function SectionTwo() {
       </section>
       <Menu.Item
         onClick={() => {
+          setStateCart(!stateCart);
           document.querySelector(".menu-expandible").classList.toggle("active");
         }}
         as="a"
@@ -354,8 +417,10 @@ export default function SectionTwo() {
       >
         <Button
           disabled={productsSelected.length === 0}
-          icon="cart"
-          color="orange"
+          icon={stateCart ? "close" : "shopping cart"}
+          color={
+            stateCart ? "red" : "orange"
+          }
           circular
         />
         {productsSelected.length > 0 ? (
